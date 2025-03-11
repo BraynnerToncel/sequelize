@@ -1,12 +1,16 @@
+// routes/user.route.ts
 import { Router } from 'express';
 import { Post, User } from '../db/schema';
 import { ValidationError } from 'sequelize';
+import { authenticate } from '../middleware/auth.middleware';
 
 const router = Router();
 
-router.get('/', async (req, res) => {
+router.get('/', authenticate, async (req, res) => {
   try {
-    const users = await User.findAll();
+    const users = await User.findAll({
+      attributes: ['id', 'email', 'name'] // No incluir password
+    });
     return void res.json(users);
   } catch (error) {
     console.log(error);
@@ -14,37 +18,28 @@ router.get('/', async (req, res) => {
   }
 });
 
-router.get("/:id", async (req, res) => {
+router.get("/:id", authenticate, async (req, res) => {
   try {
     const { id } = req.params;
-    const user = await User.findByPk(id);
+    const user = await User.findByPk(id, {
+      attributes: ['id', 'email', 'name'] // No incluir password
+    });
 
     if (!user) {
       return void res.status(404).json({ message: "User not found" });
     }
 
-    const userWithPosts = await Post.findAll({
+    const userPosts = await Post.findAll({
       where: { userId: user.id },
     });
  
-    return void res.json(userWithPosts);
+    return void res.json({
+      user,
+      posts: userPosts
+    });
   } catch (error) {
     console.log(error);
     return void res.status(500).json({ message: "Internal server error" });
-  }
-});
-
-router.post('/', async (req, res) => {
-  try {
-    const { email, name } = req.body;
-    const Newuser = await User.create({email, name});
-    return void res.status(201).json(Newuser);
-      } catch (error) {
-    console.log(error);
-    if (error instanceof ValidationError) {
-      return void res.status(400).json({ message: error.message });
-    }
-    return void res.status(500).json({ message: 'Internal Server Error' });
   }
 });
 

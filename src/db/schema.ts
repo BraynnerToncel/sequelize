@@ -1,3 +1,6 @@
+// =================================
+// db/schema.ts
+// =================================
 import {
   AllowNull,
   BeforeCreate,
@@ -14,6 +17,8 @@ import {
   Table,
   Unique,
 } from 'sequelize-typescript';
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
 
 @Table
 export class User extends Model {
@@ -38,8 +43,25 @@ export class User extends Model {
   @Column(DataType.STRING)
   password!: string;
 
-}
+  @BeforeCreate
+  static async hashPassword(instance: User) {
+    const salt = await bcrypt.genSalt(10);
+    instance.password = await bcrypt.hash(instance.password, salt);
+  }
 
+  async validatePassword(password: string): Promise<boolean> {
+    return bcrypt.compare(password, this.password);
+  }
+
+  generateAuthToken(): string {
+    const token = jwt.sign(
+      { id: this.id, email: this.email },
+      process.env.JWT_SECRET || 'tu_secreto_jwt',
+      { expiresIn: '24h' }
+    );
+    return token;
+  }
+}
 
 @Table
 export class Post extends Model {
@@ -71,4 +93,3 @@ export class Post extends Model {
   @BelongsTo(() => User)
   author!: User;
 }
-
