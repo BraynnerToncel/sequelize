@@ -1,7 +1,6 @@
 // routes/user.route.ts
 import { Router } from 'express';
 import { Post, User } from '../db/schema';
-import { ValidationError } from 'sequelize';
 import { authenticate } from '../middleware/auth.middleware';
 
 const router = Router();
@@ -9,7 +8,7 @@ const router = Router();
 router.get('/', authenticate, async (req, res) => {
   try {
     const users = await User.findAll({
-      attributes: ['id', 'email', 'name'] // No incluir password
+      attributes: ['id', 'email', 'name'] 
     });
     return void res.json(users);
   } catch (error) {
@@ -22,7 +21,7 @@ router.get("/:id", authenticate, async (req, res) => {
   try {
     const { id } = req.params;
     const user = await User.findByPk(id, {
-      attributes: ['id', 'email', 'name'] // No incluir password
+      attributes: ['id', 'email', 'name'] 
     });
 
     if (!user) {

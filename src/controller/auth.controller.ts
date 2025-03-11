@@ -82,7 +82,6 @@ export const login = async (req: Request, res: Response): Promise<void> => {
 
 export const getProfile = async (req: Request, res: Response): Promise<void> => {
   try {
-    // req.user ya está establecido por el middleware authenticate
     const user = req.user;
     
     res.json({

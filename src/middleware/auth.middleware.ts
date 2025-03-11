@@ -2,7 +2,6 @@ import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { User } from '../db/schema';
 
-// Extender el tipo Request para incluir user
 declare global {
   namespace Express {
     interface Request {

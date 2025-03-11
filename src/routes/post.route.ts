@@ -5,7 +5,6 @@ import { authenticate } from "../middleware/auth.middleware";
 
 const router = Router();
 
-// Ruta pública para obtener posts (cualquiera puede ver)
 router.get("/", async (req, res) => {
   try {
     const posts = await Post.findAll();
@@ -16,11 +15,9 @@ router.get("/", async (req, res) => {
   }
 });
 
-// Ruta protegida para crear posts (solo usuarios autenticados)
 router.post('/', authenticate, async (req, res) => {
   try {
     const { title, content } = req.body;
-    // Usamos el ID del usuario autenticado
     const userId = req.user.id;
     
     const newPost = await Post.create({ title, content, userId });
@@ -40,7 +37,6 @@ router.post('/', authenticate, async (req, res) => {
   }
 });
 
-// Agregar rutas para actualizar y eliminar posts (solo el autor puede hacerlo)
 router.put('/:id', authenticate, async (req, res) => {
   try {
     const { id } = req.params;
@@ -52,7 +48,6 @@ router.put('/:id', authenticate, async (req, res) => {
       return void res.status(404).json({ message: 'Post not found' });
     }
     
-    // Verificar que el usuario autenticado es el autor del post
     if (post.userId !== req.user.id) {
       return void res.status(403).json({ message: 'No tienes permiso para editar este post' });
     }
@@ -78,7 +73,6 @@ router.delete('/:id', authenticate, async (req, res) => {
       return void res.status(404).json({ message: 'Post not found' });
     }
     
-    // Verificar que el usuario autenticado es el autor del post
     if (post.userId !== req.user.id) {
       return void res.status(403).json({ message: 'No tienes permiso para eliminar este post' });
     }
